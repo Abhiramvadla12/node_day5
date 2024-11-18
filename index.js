@@ -6,27 +6,54 @@ var server = http.createServer(async(req,res)=>{
     console.log(data.query);
     // var param_data = data.pathname.split('/').pop();
     // console.log(param_data);
-    var response = await fetch("https://fakestoreapi.com/products");
-    var api_data = await response.json();
-    var cat = api_data.filter((element) => {
-        if (data.query.cat == "m") {
-            return element.category == "men's clothing";
-        }
-        else if(data.query.cat == "j"){
-            return element.category == "jewelery";
-        }
-        else if(data.query.cat == "e"){
-            return element.category == "electronics";
-        }
-        else if(data.query.cat == "w"){
-            return element.category == "women's clothing";
-        }
-        else{
-            res.write("please cat as 'm' or 'j' or 'e' or 'w' for men's clothing , jewelery, electronics, womans's clothing respectively other values are not allowed")
+    switch(req.method){
+        case "GET":
+
+            var response = await fetch("https://fakestoreapi.com/products");
+            var api_data = await response.json();
+            var cat = api_data.filter((element) => {
+                if (data.query.cat == "m") {
+                    return element.category == "men's clothing";
+                }
+                else if(data.query.cat == "j"){
+                    return element.category == "jewelery";
+                }
+                else if(data.query.cat == "e"){
+                    return element.category == "electronics";
+                }
+                else if(data.query.cat == "w"){
+                    return element.category == "women's clothing";
+                }
+                else{
+                    res.write("please cat as 'm' or 'j' or 'e' or 'w' for men's clothing , jewelery, electronics, womans's clothing respectively other values are not allowed")
+                    res.end();
+                }
+                
+            });
+            switch(data.query.order){
+                case "desc":
+                    res.write(JSON.stringify(cat.sort((a,b)=>
+                                 b['price'] - a['price']
+                            ),null,2));
+                    res.end();
+                    break
+                case "asc":
+                    res.write(JSON.stringify(cat.sort((a,b)=>
+                        a['price'] - b['price']
+                   ),null,2));
+                   res.end();
+                   break
+                default:
+                    res.write("please asc or desc for ascending and descending order ohter values are not allowed");
+                    res.end();
+        
+            }
+            break
+        default:
+            res.write("not found");
             res.end();
-        }
-        return false;
-    });
+    }
+    
     // if(data.query.order == "'desc'"){
     //     res.write(JSON.stringify(cat.sort((a,b)=>
     //         b['price'] - a['price']
@@ -40,27 +67,7 @@ var server = http.createServer(async(req,res)=>{
     // else{
     //     res.write("please asc or desc for ascending and descending order ohter values are not allowed");
     // }
-    switch(data.query.order){
-        case "desc":
-            res.write(JSON.stringify(cat.sort((a,b)=>
-                         b['price'] - a['price']
-                    ),null,2));
-            res.end();
-        case "asc":
-            res.write(JSON.stringify(cat.sort((a,b)=>
-                a['price'] - b['price']
-           ),null,2));
-           res.end();
-        default:
-            res.write("please asc or desc for ascending and descending order ohter values are not allowed");
-            res.end();
-
-    }
-    // }
-    // else{
-    //     res.write("data not found")
-    // }
-    res.end();
+    
 })
 var port = 3001;
 server.listen(port,()=>{
